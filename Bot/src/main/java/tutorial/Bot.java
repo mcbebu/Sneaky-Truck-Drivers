@@ -45,8 +45,6 @@ public class Bot extends TelegramLongPollingBot {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLL yyyy");
     @Override
     public void onUpdateReceived(Update update) {
-        // var msg = update.getMessage();
-        // var user = msg.getFrom();
         //obtain the telegram ID from the person ordering the parcel
         long userId = REDACTED;
         System.out.println(update);
@@ -59,53 +57,7 @@ public class Bot extends TelegramLongPollingBot {
             sendMsg(message2, userId);
             timingVote(userId);
         } else if (update.hasCallbackQuery()) {
-            //user pressed a button
-            // Set variables
-            String call_data = update.getCallbackQuery().getData();
-            long message_id = update.getCallbackQuery().getMessage().getMessageId();
-            String chat_id = update.getCallbackQuery().getMessage().getChatId().toString();
-
-            if (call_data.equals("Yes")) {
-                DeleteMessage deleteMsg = new DeleteMessage(chat_id, (int) message_id);
-                //if consignee chooses yes, show them all the available timeslots
-
-                try {
-                    execute(deleteMsg);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-                //display buttons
-                List<List<InlineKeyboardButton>> someButtons = new ArrayList<List<InlineKeyboardButton>>();
-                for (int i = 0; i < timingSize; i++) {
-                    //display each button
-                    var builtButton = InlineKeyboardButton.builder().text(timings[i]).callbackData(timings[i]).build();
-                    someButtons.add(List.of(builtButton));
-                }
-                InlineKeyboardMarkup keyboard2 = new InlineKeyboardMarkup(someButtons);
-
-                Long wrappedUserId = userId;
-                SendMessage sm = SendMessage.builder().chatId(wrappedUserId.toString())
-                        .parseMode("HTML").text("Please select your preferred timeslot:")
-                        .replyMarkup(keyboard2).build();
-                try {
-                    execute(sm);
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
-                }
-
-            } else if (call_data.equals("No")) {
-                EditMessageText new_message = new EditMessageText();
-                new_message.setChatId(chat_id);
-                new_message.setMessageId((int) message_id);
-                LocalDate localDate = LocalDate.now().plusDays(2);
-                //returns the date in 2 days in the format eg 25 Feb 2023
-                new_message.setText("Your parcel will arrive on " + localDate.format(formatter));
-                try {
-                    execute(new_message);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-            }
+            respondToButton(update, userId);
         } else {
             sendMsg("Invalid command or text :(", userId);
         }
@@ -140,6 +92,77 @@ public class Bot extends TelegramLongPollingBot {
             execute(sm);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void respondToButton(Update update, long userId) {
+        //user pressed a button
+        // Set variables
+        String call_data = update.getCallbackQuery().getData();
+        if (call_data.equals("Yes")) {
+            respondToYes(update, userId);
+        } else if (call_data.equals("No")) {
+            respondToNo(update, userId);
+        } else if (call_data.equals("9am - 12pm ($4)")) {
+            System.out.println("First slot chosen");
+        } else if (call_data.equals("12pm - 3pm ($3)")) {
+            System.out.println("Second slot chosen");
+        } else if (call_data.equals("3pm - 6pm ($5)")) {
+            System.out.println("Third slot chosen");
+        } else if (call_data.equals("6pm - 9pm ($2)")) {
+            System.out.println("Fourth slot chosen");
+        }
+    }
+
+    public void respondToYes(Update update, long userId) {
+        // user pressed Yes
+        // Set variables
+        long message_id = update.getCallbackQuery().getMessage().getMessageId();
+        String chat_id = update.getCallbackQuery().getMessage().getChatId().toString();
+        DeleteMessage deleteMsg = new DeleteMessage(chat_id, (int) message_id);
+        // show consignee all the available timeslots
+
+        try {
+            execute(deleteMsg);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+        //show buttons
+        List<List<InlineKeyboardButton>> someButtons = new ArrayList<List<InlineKeyboardButton>>();
+        for (int i = 0; i < timingSize; i++) {
+            //display each button
+            var builtButton = InlineKeyboardButton.builder().text(timings[i]).callbackData(timings[i]).build();
+            someButtons.add(List.of(builtButton));
+        }
+        InlineKeyboardMarkup keyboard2 = new InlineKeyboardMarkup(someButtons);
+        //send the keyboard with the buttons to the user
+        Long wrappedUserId = userId;
+        SendMessage sm = SendMessage.builder().chatId(wrappedUserId.toString())
+                .parseMode("HTML").text("Please select your preferred timeslot:")
+                .replyMarkup(keyboard2).build();
+        try {
+            execute(sm);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void respondToNo(Update update, long userId) {
+        //user pressed No
+        // Set variables
+        String call_data = update.getCallbackQuery().getData();
+        long message_id = update.getCallbackQuery().getMessage().getMessageId();
+        String chat_id = update.getCallbackQuery().getMessage().getChatId().toString();
+        EditMessageText new_message = new EditMessageText();
+        new_message.setChatId(chat_id);
+        new_message.setMessageId((int) message_id);
+        LocalDate localDate = LocalDate.now().plusDays(2);
+        //returns the date in 2 days in the format eg 25 Feb 2023
+        new_message.setText("Your parcel will arrive on " + localDate.format(formatter));
+        try {
+            execute(new_message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 }
