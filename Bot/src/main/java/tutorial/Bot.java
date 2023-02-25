@@ -1,25 +1,20 @@
 package tutorial;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.CopyMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.ArrayList;
-
-import static java.lang.Math.toIntExact;
 
 public class Bot extends TelegramLongPollingBot {
 
@@ -30,7 +25,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return REDACTED;
+        return "REDACTED";
     }
 
     private String[] timings = new String[0];
@@ -41,8 +36,9 @@ public class Bot extends TelegramLongPollingBot {
         timingSize = timings.length;
     }
 
-    //date time format
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLL yyyy");
+    //formatter1 displays as 23 Jan 2023
+    DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("dd LLL yyyy");
+    LocalDate currDate = LocalDate.now();
     @Override
     public void onUpdateReceived(Update update) {
         //obtain the telegram ID from the person ordering the parcel
@@ -51,9 +47,12 @@ public class Bot extends TelegramLongPollingBot {
         String trackingNumber = "a04812894214E";
         String product = "Prism flat screen TV";
         if (update.hasMessage() && update.getMessage().isCommand() && update.getMessage().getText().equals("/start")) {
-            String message1 = String.format("Dear customer, your parcel has arrived. Order no: %s", trackingNumber);
+            String message1 = String.format("Dear customer, your parcel has arrived at Ninjavan warehouse. Order no: %s", trackingNumber);
             sendMsg(message1, userId);
-            String message2 = String.format("Would you like to specify a preferred timeslot? Additional charges will apply.");
+
+            String message2 = String.format("Would you like to specify a preferred timeslot on %s?\n" +
+                    "Additional charges will apply.\n" +
+                    "This message will expire in 2 hours.", currDate.plusDays(1).format(formatter1));
             sendMsg(message2, userId);
             timingVote(userId);
         } else if (update.hasCallbackQuery()) {
@@ -134,11 +133,13 @@ public class Bot extends TelegramLongPollingBot {
             var builtButton = InlineKeyboardButton.builder().text(timings[i]).callbackData(timings[i]).build();
             someButtons.add(List.of(builtButton));
         }
+        InlineKeyboardButton cancelButton = InlineKeyboardButton.builder().text("Cancel").callbackData("No").build();
+        someButtons.add(List.of(cancelButton));
         InlineKeyboardMarkup keyboard2 = new InlineKeyboardMarkup(someButtons);
         //send the keyboard with the buttons to the user
         Long wrappedUserId = userId;
         SendMessage sm = SendMessage.builder().chatId(wrappedUserId.toString())
-                .parseMode("HTML").text("Please select your preferred timeslot:")
+                .parseMode("HTML").text(String.format("Please select your preferred timeslot on %s:", currDate.plusDays(1).format(formatter1)))
                 .replyMarkup(keyboard2).build();
         try {
             execute(sm);
@@ -158,7 +159,7 @@ public class Bot extends TelegramLongPollingBot {
         new_message.setMessageId((int) message_id);
         LocalDate localDate = LocalDate.now().plusDays(2);
         //returns the date in 2 days in the format eg 25 Feb 2023
-        new_message.setText("Your parcel will arrive on " + localDate.format(formatter));
+        new_message.setText("Your parcel will arrive on " + localDate.format(formatter1) + ".");
         try {
             execute(new_message);
         } catch (TelegramApiException e) {
