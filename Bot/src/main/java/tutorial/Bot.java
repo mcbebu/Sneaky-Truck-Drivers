@@ -21,33 +21,35 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "ninjatimeslotbot";
+        return "PunctualNinja_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "6155776896:AAETneOvLWJIKsL_rcCJqNu_MT5EwkqxekM";
+        return "6040246735:AAGYVCTuyNpdnJ_6xRv0-N-SmPLCiY5c-bQ";
     }
 
     @Override
     public void onUpdateReceived(Update update) {
+
+
         // var msg = update.getMessage();
         // var user = msg.getFrom();
         //obtain the telegram ID from the person ordering the parcel
-        long userId = REDACTED;
+        long userId = 1238930495;
         System.out.println(update);
         String trackingNumber = "a04812894214E";
         if (update.getMessage().isCommand() && update.getMessage().getText().equals("/start")) {
-            sendMsg(trackingNumber, userId);
+            sendMsg(String.format("Dear customer, your parcel has arrived. Order no: %s", trackingNumber), userId);
         }
     }
 
-    public void sendMsg(String trackingNumber, Long userId){
+    public void sendMsg(String msg, Long userId){
         //todo: find tracking number;
-        String firstMessage = String.format("Dear customer, your parcel has arrived. Order no: %s", trackingNumber);
+//        String firstMessage = String.format("Dear customer, your parcel has arrived. Order no: a04812894214E");
         SendMessage sm = SendMessage.builder()
                 .chatId(userId.toString())
-                .text(firstMessage).build();
+                .text(msg).build();
         try {
             execute(sm);
         } catch (TelegramApiException e) {
@@ -55,4 +57,6 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+
+    
 }
