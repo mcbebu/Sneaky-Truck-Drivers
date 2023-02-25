@@ -103,7 +103,10 @@ public class Bot extends TelegramLongPollingBot {
         } else if (call_data.equals("No")) {
             respondToNo(update, userId);
         } else if (call_data.equals("9am - 12pm ($4)")) {
-            System.out.println("First slot chosen");
+            var StripeToken = "284685063:TEST:ZmMzMmYyZjU3MjUw";
+            var payload = Long.toString(userId) + LocalDate.now() + "4";
+            LabeledPrice prices = new LabeledPrice("Payment", 400);
+            //this.sendInvoice();
         } else if (call_data.equals("12pm - 3pm ($3)")) {
             System.out.println("Second slot chosen");
         } else if (call_data.equals("3pm - 6pm ($5)")) {
