@@ -18,6 +18,5 @@ public class Main {
         Bot bot = new Bot(); //create a new bot
         bot.addTimings(timingOptions); //send the available timings to bot
         botsApi.registerBot(bot);
-        System.out.println(System.getProperty("java.class.path"));
     }
 }
