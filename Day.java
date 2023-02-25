@@ -17,13 +17,13 @@ public class Day {
     HashMap<String, Integer> getOptions() {
         HashMap<String, Integer> hashMap = new HashMap<String, Integer>();
         if (this._9amTo12pmSlot > 0) {
-            hashMap.put("9amTo12pmSlot", this._9AMTO12PMPRICING);
+            hashMap.put("9amTo12pmSlot", Day._9AMTO12PMPRICING);
         }
         if (this._12pmTo3pmSlot > 0) {
-            hashMap.put("12pmTo3pmSlot", this._12PMTO3PMPRICING);
+            hashMap.put("12pmTo3pmSlot", Day._12PMTO3PMPRICING);
         }
         if (this._3pmTO6pmSlot > 0) {
-            hashMap.put("3pmTo6pmSlot", this._3PMTO6PMPRICING);
+            hashMap.put("3pmTo6pmSlot", Day._3PMTO6PMPRICING);
         }
         return hashMap;
     }
