@@ -42,7 +42,7 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         //obtain the telegram ID from the person ordering the parcel
-        long userId = REDACTED;
+        long userId = update.getMessage().getFrom().getId();
         System.out.println(update);
         String trackingNumber = "a04812894214E";
         String product = "Prism flat screen TV";
