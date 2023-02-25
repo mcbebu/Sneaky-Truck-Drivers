@@ -14,10 +14,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Bot extends TelegramLongPollingBot {
-
-
 
     @Override
     public String getBotUsername() {
@@ -26,7 +25,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return REDACTED;
+        return "REDACTED";
     }
 
     @Override
@@ -37,22 +36,49 @@ public class Bot extends TelegramLongPollingBot {
         long userId = REDACTED;
         System.out.println(update);
         String trackingNumber = "a04812894214E";
+        String product = "Prism flat screen TV";
         if (update.getMessage().isCommand() && update.getMessage().getText().equals("/start")) {
-            sendMsg(trackingNumber, userId);
+            String message1 = String.format("Dear customer, your parcel has arrived. Order no: %s", trackingNumber);
+            sendMsg(message1, userId);
+            String message2 = String.format("Would you like to specify a preferred timeslot? Additional charges will apply.");
+            sendMsg(message2, userId);
+            timingVote(userId);
         }
     }
-
-    public void sendMsg(String trackingNumber, Long userId){
+    //template to send a message to the consignee
+    public void sendMsg(String message, Long userId){
         //todo: find tracking number;
-        String firstMessage = String.format("Dear customer, your parcel has arrived. Order no: %s", trackingNumber);
         SendMessage sm = SendMessage.builder()
                 .chatId(userId.toString())
-                .text(firstMessage).build();
+                .text(message).build();
         try {
             execute(sm);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
     }
+    private String[] timings;
+    //the timings are initialised when the bot is created
+    public void addTimings(String[] timings) {
+        this.timings = timings;
+    }
 
+    public void timingVote(Long userId){
+        //todo: find tracking number;
+
+        var yes = InlineKeyboardButton.builder().text("Yes").callbackData("Yes").build();
+        var no = InlineKeyboardButton.builder().text("No").callbackData("No").build();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+        rowInline.add(yes);
+        rowInline.add(no);
+        InlineKeyboardMarkup keyboard1 = InlineKeyboardMarkup.builder().keyboardRow(rowInline).build();
+        SendMessage sm = SendMessage.builder().chatId(userId.toString())
+                .parseMode("HTML").text("Do you want to choose a timeslot?")
+                .replyMarkup(keyboard1).build();
+        try {
+            execute(sm);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
