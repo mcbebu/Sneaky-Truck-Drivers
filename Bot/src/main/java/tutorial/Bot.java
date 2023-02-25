@@ -16,6 +16,8 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import java.util.List;
 import java.util.ArrayList;
 
+import static java.lang.Math.toIntExact;
+
 public class Bot extends TelegramLongPollingBot {
 
     @Override
@@ -25,7 +27,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "REDACTED";
+        return REDACTED;
     }
 
     @Override
@@ -37,7 +39,7 @@ public class Bot extends TelegramLongPollingBot {
         System.out.println(update);
         String trackingNumber = "a04812894214E";
         String product = "Prism flat screen TV";
-        if (update.getMessage().isCommand() && update.getMessage().getText().equals("/start")) {
+        if (update.hasMessage() && update.getMessage().isCommand() && update.getMessage().getText().equals("/start")) {
             String message1 = String.format("Dear customer, your parcel has arrived. Order no: %s", trackingNumber);
             sendMsg(message1, userId);
             String message2 = String.format("Would you like to specify a preferred timeslot? Additional charges will apply.");
@@ -48,25 +50,23 @@ public class Bot extends TelegramLongPollingBot {
             // Set variables
             String call_data = update.getCallbackQuery().getData();
             long message_id = update.getCallbackQuery().getMessage().getMessageId();
-            Long chat_id = update.getCallbackQuery().getMessage().getChatId();
+            String chat_id = update.getCallbackQuery().getMessage().getChatId().toString();
 
             if (call_data.equals("Yes")) {
-                String answer = "Updated message text";
-                EditMessageText new_message = new EditMessageText()
-                        .setChatId(chat_id)
-                        .setMessageId(toIntExact(message_id))
-                        .setText(answer);
+                EditMessageText new_message = new EditMessageText();
+                new_message.setChatId(chat_id);
+                new_message.setMessageId((int) message_id);
+                new_message.setText("FINALLY WORKING");
                 try {
                     execute(new_message);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
             } else if (call_data.equals("No")) {
-                String answer = "Updated message text";
-                EditMessageText new_message = new EditMessageText()
-                        .setChatId(chat_id)
-                        .setMessageId(toIntExact(message_id))
-                        .setText(answer);
+                EditMessageText new_message = new EditMessageText();
+                new_message.setChatId(chat_id);
+                new_message.setMessageId((int) message_id);
+                new_message.setText("FINALLY WORKING");
                 try {
                     execute(new_message);
                 } catch (TelegramApiException e) {
@@ -77,6 +77,7 @@ public class Bot extends TelegramLongPollingBot {
             sendMsg("Invalid command or text :(", userId);
         }
     }
+
     //template to send a message to the consignee
     public void sendMsg(String message, Long userId){
         //todo: find tracking number;
