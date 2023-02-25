@@ -18,9 +18,9 @@ They get commission from completing these priority deliveries | They know with m
     > 4 time slots will be available:
     0900-1200, 1200-1500, 1500-1800, 1800-2000
 
-    Dynamic Pricing based on demand and supply factors, subject to a floor price.
+    >Dynamic Pricing based on demand and supply factors, subject to a floor price.
 
-    A time slot option will no longer be available once the capacity has been reached (e.g. 1200-1500 option will no longer show on telegram once capacity has been reached).
+    >A time slot option will no longer be available once the capacity has been reached (e.g. 1200-1500 option will no longer show on telegram once capacity has been reached).
 
 - Option to cancel **before** cutoff time
 
@@ -29,3 +29,6 @@ They get commission from completing these priority deliveries | They know with m
 - Payments
 
     >After the desired time slot has been selected, the bot will generate a link to an external site for payments (using Stripe in our implementation), but for actual implementation perhaps Ninja Finance can be adjusted to support this functionality.
+
+### Technologies Used
+- Java, Telegram Bot API, Huawei Cloud
