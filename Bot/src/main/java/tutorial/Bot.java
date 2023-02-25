@@ -43,6 +43,38 @@ public class Bot extends TelegramLongPollingBot {
             String message2 = String.format("Would you like to specify a preferred timeslot? Additional charges will apply.");
             sendMsg(message2, userId);
             timingVote(userId);
+        } else if (update.hasCallbackQuery()) {
+            //user pressed a button
+            // Set variables
+            String call_data = update.getCallbackQuery().getData();
+            long message_id = update.getCallbackQuery().getMessage().getMessageId();
+            Long chat_id = update.getCallbackQuery().getMessage().getChatId();
+
+            if (call_data.equals("Yes")) {
+                String answer = "Updated message text";
+                EditMessageText new_message = new EditMessageText()
+                        .setChatId(chat_id)
+                        .setMessageId(toIntExact(message_id))
+                        .setText(answer);
+                try {
+                    execute(new_message);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            } else if (call_data.equals("No")) {
+                String answer = "Updated message text";
+                EditMessageText new_message = new EditMessageText()
+                        .setChatId(chat_id)
+                        .setMessageId(toIntExact(message_id))
+                        .setText(answer);
+                try {
+                    execute(new_message);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            sendMsg("Invalid command or text :(", userId);
         }
     }
     //template to send a message to the consignee
