@@ -1,4 +1,5 @@
-package tutorial;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.PaymentIntentCreateParams;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -58,41 +59,23 @@ public class Bot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         //obtain the telegram ID from the person ordering the parcel
-        //long userId = update.getMessage().getFrom().getId();
         long userId = 0;
+        //initialise userId for every update
         if (update.hasMessage()) {
             userId = update.getMessage().getFrom().getId();
         } else if (update.hasCallbackQuery()) {
             userId = update.getCallbackQuery().getFrom().getId();
         }
-        //long userId = REDACTED;
         System.out.println(update);
         String trackingNumber = "a04812894214E";
         String product = "Prism flat screen TV";
         if (update.hasCallbackQuery() && update.getCallbackQuery().getMessage().getText().startsWith("/pay")) {
-            String text = update.getCallbackQuery().getMessage().getText();
             SendMessage message;
-            try {
-                String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
-                Map<String, Object> chargeParams = new HashMap<String, Object>();
-                chargeParams.put("amount", 1000); // Amount in cents
-                chargeParams.put("currency", "usd");
-                chargeParams.put("description", "Test Payment");
-                chargeParams.put("source", "tok_visa"); // Replace with your actual Stripe token
-                Charge charge = Charge.create(chargeParams);
-                message = new SendMessage();
-                message.setChatId(chatId);
-                message.setText("Payment successful!");
-                String amount = text.split(" ")[1];
-                message.setText("Your payment of $" + amount + " was successful! Thank you for using our service.");
-
-
-            } catch (StripeException e) {
-                message = new SendMessage();
-                message.setChatId(update.getMessage().getChatId().toString());
-                message.setText("Error processing payment: " + e.getMessage());
-
-            }
+            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+            String paymentUrl = "https://buy.stripe.com/4gw8y8f5kcqueZO3cc";
+            message = new SendMessage();
+            message.setChatId(chatId);
+            message.setText("Please go to " + paymentUrl + " to submit your payment.");
             try {
                 execute(message);
             } catch (TelegramApiException telegramApiException){
@@ -110,36 +93,6 @@ public class Bot extends TelegramLongPollingBot {
             timingVote(userId);
         } else if (update.hasCallbackQuery()) {
             respondToButton(update, userId);
-        } else if (update.hasMessage() && update.getMessage().getText().startsWith("/pay")) {
-            // Parse the payment amount from the message
-            String[] parts = update.getMessage().getText().split(" ");
-            int amount = Integer.parseInt(parts[1]);
-
-            // Create a charge
-            Map<String, Object> chargeParams = new HashMap<>();
-            chargeParams.put("amount", amount * 100);
-            chargeParams.put("currency", "sgd");
-            chargeParams.put("description", "Payment for Telegram bot");
-            chargeParams.put("source", "tok_visa");
-            try {
-                Charge charge = Charge.create(chargeParams);
-                // Send a payment confirmation message to the user
-                SendMessage message = new SendMessage();
-                message.setChatId(update.getMessage().getChatId().toString());
-                message.setText("Your payment of $" + amount + " was successful! Thank you for using our service.");
-                execute(message);
-            } catch (StripeException | TelegramApiException e) {
-                e.printStackTrace();
-                SendMessage message = new SendMessage();
-                message.setChatId(update.getMessage().getChatId().toString());
-                message.setText("There was an error processing your payment. Please try again later.");
-                try {
-                    execute(message);
-                } catch (TelegramApiException telegramApiException) {
-                    telegramApiException.printStackTrace();
-                }
-            }
-
         } else {
             sendMsg("Invalid command or text :(", userId);
         }
@@ -277,53 +230,5 @@ public class Bot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-    }
-    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        Long userId = 0L;
-        if (update.hasMessage()) {
-            userId = update.getMessage().getFrom().getId();
-        } else if (update.hasCallbackQuery()) {
-            userId = update.getCallbackQuery().getFrom().getId();
-        }
-        System.out.println(update);
-        SendMessage sm = SendMessage.builder()
-                .chatId(userId.toString())
-                .text("error processing payment").build();
-        return sm;
-
-        /*if (update.hasMessage() && update.getMessage().hasText()) {
-            String text = update.getMessage().getText();
-            if (text.equals("/pay")) {
-                try {
-                    String chatId = update.getMessage().getChatId().toString();
-                    Map<String, Object> chargeParams = new HashMap<String, Object>();
-                    chargeParams.put("amount", 1000); // Amount in cents
-                    chargeParams.put("currency", "usd");
-                    chargeParams.put("description", "Test Payment");
-                    chargeParams.put("source", "tok_visa"); // Replace with your actual Stripe token
-                    Charge charge = Charge.create(chargeParams);
-                    SendMessage message = new SendMessage();
-                    message.setChatId(chatId);
-                    message.setText("Payment successful!");
-                    return message;
-                } catch (StripeException e) {
-                    SendMessage message = new SendMessage();
-                    message.setChatId(update.getMessage().getChatId());
-                    message.setText("Error processing payment: " + e.getMessage());
-                    return message;
-                }
-            }
-        }
-        catch(StripeException | TelegramApiException e){
-            e.printStackTrace();
-            SendMessage message = new SendMessage();
-            message.setChatId(update.getMessage().getChatId());
-            message.setText("There was an error processing your payment. Please try again later.");
-            try {
-                execute(message);
-            } catch (TelegramApiException telegramApiException) {
-                telegramApiException.printStackTrace();
-            }
-        }*/
     }
 }
