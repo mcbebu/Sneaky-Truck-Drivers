@@ -72,7 +72,7 @@ public class Bot extends TelegramLongPollingBot {
         if (update.hasCallbackQuery() && update.getCallbackQuery().getMessage().getText().startsWith("/pay")) {
             SendMessage message;
             String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
-            String paymentUrl = "https://buy.stripe.com/4gw8y8f5kcqueZO3cc";
+            String paymentUrl = REDACTED;
             message = new SendMessage();
             message.setChatId(chatId);
             message.setText("Please go to " + paymentUrl + " to submit your payment.");
